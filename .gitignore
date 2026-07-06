@@ -3,5 +3,5 @@ build/
 .cache/
 .temp/
 .zed/
-.obsidian/
+ notes/.obsidian/
 .env
