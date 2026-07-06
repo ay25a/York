@@ -1,0 +1,1 @@
+list(APPEND YORK_SOURCES "${CMAKE_CURRENT_LIST_DIR}/dummy.cpp")

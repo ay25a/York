@@ -1,0 +1,6 @@
+bin/
+build/
+.cache/
+.temp/
+.zed/
+.env

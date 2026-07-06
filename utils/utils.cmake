@@ -1,0 +1,1 @@
+list(APPEND YORK_HEADERS "${CMAKE_CURRENT_LIST_DIR}/version.hpp")
