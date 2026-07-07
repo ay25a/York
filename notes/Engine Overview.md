@@ -1,3 +1,6 @@
+# Overview
+The end goal is to build a code-based game engine capable of rendering both 3D and 2D objects. No editor or scripting exists, building games is done through modules interfaces.
+
 Each module's ultimate goal is to operate independently with minimum dependency on other modules, although this goal is naturally impractical for many modules, such as the editor and the renderer.
 
 Each module should be replaceable by modifying its own implementation, and well-defined integration points that connect modules together into a coherent system.
@@ -8,30 +11,23 @@ Every dependency (including data structures library, logging library, macros, ut
 
 The design prioritize performance in hot code paths, simplicity in platform-specific implementations, and modularity wherever applicable.
 
-## Error Handling
-In modern C++, errors can be handled in two common ways:
-- Using `std::expected`.
-- Using an error enum.
-Both approaches are valuable, but I can't help feeling that an error enum is superior to `std::expected`, which introduces additional considerations regarding copy and move operations for heavy objects.
-
-The `std::expected` approach is particularly useful for returning lightweight values, such as pointers and integer handles. It also allows for error logging to be centralized within higher-level modules.
-
-However, both approaches can work hand in hand for different parts of the code, while also keeping error logging as controlled as possible.
-
-Ultimately, my decision is to use an error enum wherever no success value exist, and to combine it with `std::expected` whenever a lightweight return value is required. 
-
-Expensive-to-copy objects are avoided wherever possible by using techniques such as the `Singleton` pattern or resource IDs. 
 
 ## Resource and Object Creation
 In my past experiences, i have used two main patterns: singletons and factory methods. Apparently however, over-using either of them introduces additional complexity that can be avoided using a different approach.
 
 Main systems (including `DisplayServer`, `RendererServer`, `Logger`, etc...) use the "Singleton" approach, to ensure a valid initialization state, a static "Create" method is provided:
 ```
-static System* s_Singleton;
+static System* s_singleton;
 static System* GetSingleton();
 static std::expected<System*, Error> Create(...); // if successful it initializes the singleton and returns it, otherwise it returns an error.
 
 void shutdown(); // called to clear the singleton and shutdown the system
+```
+Additionally, System::Create() is the owner of the singleton:
+```
+static System system;
+...
+s_singleton = &system;
 ```
 
 Each system's internal resources are accessed via a `ResourceID`, and can return a handle when requested. A `ResourceID` is a class with an integer identifying resources uniquely and serves as a logical reference to the resource. Resource handles, on the other hand, are pointers to the actual resource internal data, but do not prevent resource destruction once no `ResourceIDs` reference the resource.
@@ -79,13 +75,13 @@ Formatting and naming conventions:
 - `m_` prefix for private member variables.
 - `s_` prefix for static variables.
 - `g_` prefix for global variables.
-- `p` prefix for raw and smart pointers of any variable (e.g. `m_ptexture`).
+- `p` prefix for raw pointers variables (e.g. `ptexture`).
 - `YE_` prefix for macros.
+- `e` prefix for enums (e.g. `eError`).
 
 Dependency rules:
 - Dependencies should be completely justified.
 - Dependencies are added as Git submodules and built with the project.
-- Header-only dependencies are preferred if available.
 - Platform dependencies should never leak outside of low-level systems unless justified.
 
 General conventions:
