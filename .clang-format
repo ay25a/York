@@ -1,7 +1,7 @@
 BasedOnStyle: Google
 IndentWidth: 2
 UseTab: Never
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 IndentCaseLabels: false
 ColumnLimit: 0
 SortIncludes: false
