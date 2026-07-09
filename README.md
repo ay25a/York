@@ -1,3 +1,3 @@
 # York Engine
 
-Design Notes: [Notes](notes/Engine%20Overview.md)
+Design Documentation: [Docs](docs/Engine%20Overview.md)
