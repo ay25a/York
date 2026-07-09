@@ -3,16 +3,21 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/async.h>
+#include <filesystem>
 
 namespace ye {
+const std::filesystem::path Logger::FILE_LOG_PATH = std::filesystem::current_path().append("logs");
+const std::chrono::system_clock::time_point Logger::LAUNCH_TIMESTAMP = std::chrono::system_clock::now();
+
 Logger* Logger::s_singleton = nullptr;
 
 std::shared_ptr<spdlog::logger> Logger::CreateLogger(const char* name, bool enable_file, bool enable_console) {
   std::vector<spdlog::sink_ptr> sinks;
 
   if (enable_file) {
-    auto now = std::chrono::system_clock::now();
-    sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(std::format("logs/{}_{:%Y-%m-%d_%H:%M:%S}.txt", name, now), true));
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(LAUNCH_TIMESTAMP.time_since_epoch()) % 1000;
+    const auto path = std::filesystem::path(FILE_LOG_PATH).append(std::format("{}_{:%Y%m%d%H%M}_{}.log", name, LAUNCH_TIMESTAMP, ms.count()));
+    sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(path, true));
   }
 
   if (enable_console)
@@ -46,7 +51,13 @@ eError Logger::Create(bool file_logger, bool console_logger) {
   if (s_singleton)
     return SUCCESS;
 
+  if (!std::filesystem::exists(FILE_LOG_PATH) && !std::filesystem::create_directories(FILE_LOG_PATH))
+    YE_FATAL("Cannot create the Logger file log path!");
+
   spdlog::init_thread_pool(8192, 1);
+  spdlog::set_error_handler([](const std::string& err) {
+    YE_FATAL("spdlog internal error: " + err);
+  });
 
   if (logger.m_engine_logger = Logger::CreateLogger("Engine", file_logger, console_logger); !logger.m_engine_logger)
     return ERR_CANNOT_CREATE;
@@ -57,12 +68,14 @@ eError Logger::Create(bool file_logger, bool console_logger) {
 
 void Logger::Shutdown() {
   m_engine_logger->flush();
-  if (m_client_logger)
+  m_engine_logger.reset();
+
+  if (m_client_logger) {
     m_client_logger->flush();
+    m_client_logger.reset();
+  }
 
   spdlog::shutdown();
-  m_client_logger.reset();
-  m_engine_logger.reset();
   s_singleton = nullptr;
 }
 }  // namespace ye

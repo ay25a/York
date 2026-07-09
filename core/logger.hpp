@@ -6,10 +6,14 @@
 #define SPDLOG_DISABLE_DEFAULT_LOGGER
 #include <memory>
 #include <spdlog/logger.h>
+#include <filesystem>
 
 namespace ye {
 class Logger {
  private:
+  static const std::filesystem::path FILE_LOG_PATH;
+  static const std::chrono::system_clock::time_point LAUNCH_TIMESTAMP;
+
   static Logger* s_singleton;
   Logger() noexcept = default;
 
@@ -42,7 +46,7 @@ class Logger {
   static eError Create(bool file_log = true, bool console_log = true);
 #endif
 
-  ~Logger() { Shutdown(); }
+  ~Logger() = default;
   void Shutdown();
 };
 
