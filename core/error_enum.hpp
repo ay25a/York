@@ -4,15 +4,15 @@
 
 namespace ye {
 enum eError {
-  ERR_OK = 0,
+  SUCCESS = 0,
   ERR_CANNOT_CREATE,
 };
 
 inline constexpr const char* ErrorToString(eError err) {
   switch (err) {
     // clang-format off
-  case ERR_OK:            return "OK";
-  case ERR_CANNOT_CREATE: return "Cannot Create";
+  case SUCCESS:             return "Success";
+  case ERR_CANNOT_CREATE:   return "Cannot Create";
     // clang-format on
   }
 }

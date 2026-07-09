@@ -10,4 +10,4 @@ target_link_libraries(sandbox PRIVATE york)
 set_target_properties(sandbox PROPERTIES
 DEBUG_POSTFIX          "_debug"
 RELEASE_POSTFIX        "_release"
-RELWITHDEBINFO_POSTFIX "_relWithDebInfo")
+RELWITHDEBINFO_POSTFIX "_relwithdebinfo")

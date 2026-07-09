@@ -1,4 +1,4 @@
 set(SPDLOG_NO_EXCEPTIONS ON)
 set(SPDLOG_USE_STD_FORMAT ON)
 set(DSPDLOG_BUILD_EXAMPLE OFF)
-add_subdirectory(vendor/spdlog)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/spdlog)

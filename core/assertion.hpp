@@ -1,37 +1,42 @@
 #pragma once
 
 #include <cstdlib>
-
-#if defined(YE_REL_WITH_DEB_INFO) || defined(YE_DEBUG)
 #include <print>
 
 #if defined(_MSC_VER)
+#define YE_FUNCTION __FUNCSIG__
 #define YE_DEBUG_BREAK() __debugbreak()
 #elif defined(__clang__) || defined(__GNUC__)
+#define YE_FUNCTION __PRETTY_FUNCTION__
 #define YE_DEBUG_BREAK() __builtin_trap()
 #else
 #include <csignal>
+#define YE_FUNCTION __func__
 #define YE_DEBUG_BREAK() raise(SIGTRAP)
 #endif
 
-#define YE_ASSERT(cond, message)                                                                  \
-  do {                                                                                            \
-    if (cond) continue;                                                                           \
-    std::println("ASSERTION FAILED!\nExpression: {}\nMessage: {}\nLocation: {}:{}\nFunction: {}", \
-                 #cond, message, __FILE__, __LINE__, __PRETTY_FUNCTION__);                        \
-    YE_DEBUG_BREAK();                                                                             \
-    std::abort();                                                                                 \
-  } while (false);
+#if defined(YE_DEBUG)
+#define YE_ASSERT(cond, message)                                                                            \
+  do {                                                                                                      \
+    if (!(cond)) {                                                                                          \
+      std::println(stderr, "ASSERTION FAILED!\nExpression: {}\nMessage: {}\nLocation: {}:{}\nFunction: {}", \
+                   #cond, message, __FILE__, __LINE__, YE_FUNCTION);                                        \
+      std::fflush(stderr);                                                                                  \
+      YE_DEBUG_BREAK();                                                                                     \
+      std::abort();                                                                                         \
+    }                                                                                                       \
+  } while (false)
 #else
 #define YE_ASSERT(...)
 #endif
 
-#define YE_FATAL(...)                                                  \
-  do {                                                                 \
-    ye::Logger::GetSingleton()->GetEngineLogger()->error(__VA_ARGS__); \
-    ye::Logger::GetSingleton()->Shutdown();                            \
-    std::abort();                                                      \
-  } while (false);
-
-// To satisfy the compiler
-namespace {}
+#define YE_FATAL(err)                                                                                                             \
+  do {                                                                                                                            \
+    if (::ye::Logger::Exist()) {                                                                                                  \
+      ::ye::Logger::GetSingleton().GetEngineLogger().dump_backtrace();                                                            \
+      ::ye::Logger::GetSingleton().GetEngineLogger().critical("{} occured at {}:{} at {}", err, __FILE__, __LINE__, YE_FUNCTION); \
+      ::ye::Logger::GetSingleton().Shutdown();                                                                                    \
+    } else                                                                                                                        \
+      std::println(stderr, "FATAL ERROR: {} occured at {}:{} in {}", err, __FILE__, __LINE__, YE_FUNCTION);                       \
+    std::abort();                                                                                                                 \
+  } while (false)
