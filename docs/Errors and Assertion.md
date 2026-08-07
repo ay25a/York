@@ -20,3 +20,7 @@ Error codes should be general-purpose and only become more specified when necess
 Assertions should be enabled in both `Debug` and `RelWithDebInfo` modes, and disabled in `Release` mode. Each assertion should include a descriptive error failure message.
 
 Assertions should be avoided in hot code paths. They should only be used to indicate programmer errors or invalid assumptions indicating a bug in the engine
+
+## Fatal Errors
+Fatal errors are unrecoverable errors that terminate the engine execution.
+These errors are reported using either the [[logger]] if it exists or `std::println`.

@@ -1,4 +1,4 @@
- ## External Logging Library
+## Logging Library
 `spdlog` is used as a logging library due to its familiarity and performance.
 
 ## Specifications

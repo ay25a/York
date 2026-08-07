@@ -10,8 +10,6 @@ Platform-specific implementations should be unified with as little overhead and 
 Every dependency (including data structures library, logging library, macros, utility) should be explicitly justified.
 
 The design prioritize performance in hot code paths, simplicity in platform-specific implementations, and modularity wherever applicable.
-
-
 ## Resource and Object Creation
 In my past experiences, i have used two main patterns: singletons and factory methods. Apparently however, over-using either of them introduces additional complexity that can be avoided using a different approach.
 

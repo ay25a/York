@@ -13,6 +13,7 @@ inline constexpr const char* ErrorToString(eError err) {
     // clang-format off
   case SUCCESS:             return "Success";
   case ERR_CANNOT_CREATE:   return "Cannot Create";
+  default:                  return "UNKNOWN";
     // clang-format on
   }
 }

@@ -2,11 +2,10 @@
 #include "core/logger.hpp"
 
 using namespace ye;
-int main() {
-  if (Logger::Create() != ye::SUCCESS)
-    YE_FATAL("Logger cannot be created!");
 
-  YE_ENGINE_ERROR("ERR");
+int main() {
+  if (auto res = Logger::Create(); res != ye::SUCCESS)
+    YE_FATAL(std::format("Logger: {}", res));
 
   Logger::GetSingleton().Shutdown();
   return 0;
