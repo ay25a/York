@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <compare>
 
 template <typename _NumT>
   requires std::integral<_NumT> || std::floating_point<_NumT>
