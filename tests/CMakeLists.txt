@@ -4,7 +4,7 @@ project(YorkTest LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(york_tests input_tests.cpp)
+add_executable(york_tests input_test.cpp)
 target_link_libraries(york_tests PRIVATE
   york
   GTest::gtest
