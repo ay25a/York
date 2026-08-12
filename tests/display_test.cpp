@@ -7,6 +7,8 @@ TEST(DisplayTest, WindowIDGeneration) {
   {
     DummyDisplay ds;
 
+    ASSERT_TRUE(ds.GetServer() != nullptr);
+
     EXPECT_EQ(ds.GetServer()->GetWindowCount(), 0);
     EXPECT_EQ(ds.GetServer()->CreateWindow({}).value().Get(), 0);
     EXPECT_EQ(ds.GetServer()->GetWindowCount(), 1);

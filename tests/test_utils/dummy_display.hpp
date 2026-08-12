@@ -23,7 +23,7 @@ class DummyDisplay {
 
    public:
     void InjectKeyEvent(eInputKey key, bool is_pressed) noexcept {
-      DisplayServer::SetKeyState(WindowID::INVALID_ID(), static_cast<uint32_t>(key), is_pressed);
+      DisplayServer::SetKeyState(WindowID::INVALID_ID(), key, is_pressed);
     }
 
     struct WindowEvent {
@@ -59,7 +59,8 @@ class DummyDisplay {
 
  public:
   DummyDisplay() {
-    YE_ASSERT(DisplayServer::Create(std::make_unique<DummyServer>()) == SUCCESS, "Display Test Failed! Cannot create display server");
+    auto res = DisplayServer::Create(std::make_unique<DummyServer>());
+    YE_ASSERT(res == SUCCESS, "Display Test Failed! Cannot create display server");
   }
 
   ~DummyDisplay() {

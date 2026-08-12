@@ -45,7 +45,7 @@ class DisplayServer {
   void SetWindowMode(const WindowID& id, eWindowMode mode) noexcept;
   void SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexcept;
   void SetWindowFocus(const WindowID& id, bool is_focused) noexcept;
-  void SetKeyState(const WindowID& id, uint32_t native_key, bool is_pressed) noexcept;
+  void SetKeyState(const WindowID& id, eInputKey native_key, bool is_pressed) noexcept;
   void SetMousePosition(const WindowID& id, const vec2<float>& pos) noexcept;
   void SetMouseWheelDelta(const WindowID& id, vec2<int16_t> delta) noexcept;
 

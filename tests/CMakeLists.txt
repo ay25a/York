@@ -16,3 +16,7 @@ target_link_libraries(york_tests PRIVATE
 
 include(GoogleTest)
 gtest_discover_tests(york_tests)
+set_target_properties(york_tests PROPERTIES
+DEBUG_POSTFIX          "_debug"
+RELEASE_POSTFIX        "_release"
+RELWITHDEBINFO_POSTFIX "_relwithdebinfo")

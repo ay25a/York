@@ -38,10 +38,8 @@ void DisplayServer::SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexc
   m_windows[id].m_size = size;
 }
 
-void DisplayServer::SetKeyState(const WindowID& id, uint32_t key, bool is_pressed) noexcept {
-  YE_ASSERT(m_input_map.contains(key), "Input map doesn't contain a native key!");
-
-  InputState::UpdateKeyState(m_input_map[key], is_pressed);
+void DisplayServer::SetKeyState(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
+  InputState::UpdateKeyState(key, is_pressed);
 }
 
 void DisplayServer::SetMousePosition(const WindowID& id, const vec2<float>& pos) noexcept {
