@@ -8,49 +8,46 @@
 namespace ye {
 // clang-format off
 enum class eWindowMode { Windowed, Fullscreen, Maximized, Minimized };
-enum eWindowFlagBit: uint32_t {};
+enum eWindowFlagBit: uint16_t {
+  WINDOW_FLAG_NO_RESIZE_BIT = 1 << 0,
+  WINDOW_FLAG_MAX_BIT = 1 << 2,
+};
+
+using WindowFlags = uint16_t;
 // clang-format on
 
 struct WindowID {
-  int32_t value = 0;
+  friend class DisplayServer;
 
-  WindowID(int32_t value) : value(value) {}
-  WindowID() = default;
-  ~WindowID() = default;
+  constexpr static WindowID INVALID_ID() { return WindowID(); }
+  constexpr WindowID() noexcept = default;
 
-  auto operator<=>(const WindowID&) const = default;
+  constexpr auto operator<=>(const WindowID&) const noexcept = default;
+  constexpr int32_t Get() const noexcept { return id; }
 
-  WindowID& operator++() {
-    value++;
+ private:
+  constexpr WindowID& operator++() noexcept {
+    id++;
     return *this;
   }
 
-  WindowID& operator--() {
-    value--;
+  constexpr WindowID& operator--() noexcept {
+    id--;
     return *this;
   }
 
-  WindowID operator++(int) {
-    WindowID old = *this;
-    ++value;
-    return old;
-  }
-
-  WindowID operator--(int) {
-    WindowID old = *this;
-    --value;
-    return old;
-  }
+ private:
+  int32_t id = -1;
 };
 
 class Window {
   friend class DisplayServer;
 
  public:
-  static constexpr uint32_t INVALID_ID = UINT32_MAX;
+  Window() = default;
 
  private:
-  Window(void* handle, WindowID id, std::string_view title, eWindowMode mode, vec2<uint16_t> size, uint32_t flags)
+  Window(void* handle, WindowID id, std::string_view title, eWindowMode mode, vec2<uint16_t> size, WindowFlags flags)
       : m_handle(handle), m_id(id), m_title(title), m_mode{mode}, m_size(size), m_flags(flags) {};
 
  public:
@@ -59,24 +56,24 @@ class Window {
   eWindowMode GetMode() const noexcept { return m_mode; }
   vec2<uint16_t> GetSize() const noexcept { return m_size; }
   bool IsFocused() const noexcept { return m_is_focused; }
-  bool HasFlag(eWindowFlagBit flag) { return m_flags & flag; }
+  bool HasFlag(eWindowFlagBit flag) const noexcept { return m_flags & flag; }
 
  private:
   void* m_handle = nullptr;
-  WindowID m_id = INVALID_ID;
+  WindowID m_id;
   std::string m_title;
   eWindowMode m_mode = eWindowMode::Windowed;
   vec2<uint16_t> m_size;
   bool m_is_focused = true;
-  uint32_t m_flags = 0;
+  WindowFlags m_flags = eWindowFlagBit::WINDOW_FLAG_MAX_BIT;
 };
 }  // namespace ye
 
 namespace std {
 template <>
 struct hash<ye::WindowID> {
-  size_t operator()(const ye::WindowID& id) const noexcept {
-    return std::hash<decltype(id.value)>{}(id.value);
+  size_t operator()(const ye::WindowID& wid) const noexcept {
+    return std::hash<decltype(wid.Get())>{}(wid.Get());
   }
 };
 };  // namespace std

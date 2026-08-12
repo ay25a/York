@@ -17,6 +17,7 @@ set(YORK_HEADERS)
 
 include(utils/utils.cmake)
 include(core/core.cmake)
+include(servers/servers.cmake)
 include(vendor/vendor.cmake)
 
 add_library(york STATIC ${YORK_SOURCES} ${YORK_HEADERS})
