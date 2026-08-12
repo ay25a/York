@@ -125,6 +125,6 @@ enum class eInputKey {
   MouseX1,
   MouseX2,
 
-  Count = 128
+  Count,
 };
 }  // namespace ye

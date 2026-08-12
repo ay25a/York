@@ -1,13 +1,13 @@
 #include "input_state.hpp"
 
+namespace ye {
 // clang-format off
-std::bitset<static_cast<uint32_t>(ye::eInputKey::Count)>  ye::InputState::s_keys_state;
-vec2<float>                                               ye::InputState::s_mouse_position;
-vec2<float>                                               ye::InputState::s_mouse_position_delta;
-vec2<int16_t>                                             ye::InputState::s_mouse_wheel_delta;
+std::bitset<InputState::ALIGNED_INPUT_COUNT>  InputState::s_keys_state;
+vec2<float>                                   InputState::s_mouse_position;
+vec2<float>                                   InputState::s_mouse_position_delta;
+vec2<int16_t>                                 InputState::s_mouse_wheel_delta;
 // clang-format on
 
-namespace ye {
 void InputState::ResetDeltas() noexcept {
   s_mouse_position_delta = {.0f, .0f};
   s_mouse_wheel_delta = {0, 0};

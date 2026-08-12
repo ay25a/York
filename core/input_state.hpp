@@ -33,7 +33,9 @@ class InputState {
   }
 
  private:
-  static std::bitset<static_cast<uint32_t>(eInputKey::Count)> s_keys_state;
+  static constexpr uint32_t ALIGNED_INPUT_COUNT = (static_cast<uint32_t>(eInputKey::Count) + 127) & ~127;
+
+  static std::bitset<ALIGNED_INPUT_COUNT> s_keys_state;
   static vec2<float> s_mouse_position;
   static vec2<float> s_mouse_position_delta;
   static vec2<int16_t> s_mouse_wheel_delta;

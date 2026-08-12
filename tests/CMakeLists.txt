@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_executable(york_tests
   display_test.cpp
+  input_test.cpp
 )
 target_link_libraries(york_tests PRIVATE
   york
