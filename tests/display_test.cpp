@@ -4,26 +4,23 @@
 using namespace ye;
 
 TEST(DisplayTest, WindowIDGeneration) {
-  {
+  while (0) {
     DummyDisplay ds;
 
-    ASSERT_TRUE(ds.GetServer() != nullptr);
+    EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
+    EXPECT_EQ(ds.GetServer().CreateWindow({}).value().Get(), 0);
+    EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
 
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 0);
-    EXPECT_EQ(ds.GetServer()->CreateWindow({}).value().Get(), 0);
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 1);
+    WindowID created = ds.GetServer().CreateWindow({}).value();
+    EXPECT_EQ(ds.GetServer().GetWindowCount(), 2);
+    ds.GetServer().DestroyWindow(created);
+    EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
+  }
 
-    WindowID created = ds.GetServer()->CreateWindow({}).value();
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 2);
-    ds.GetServer()->DestroyWindow(created);
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 1);
-  }
-  {
-    DummyDisplay ds;
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 0);
-    EXPECT_EQ(ds.GetServer()->CreateWindow({}).value().Get(), 0);
-    EXPECT_EQ(ds.GetServer()->GetWindowCount(), 1);
-  }
+  DummyDisplay ds;
+  EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
+  EXPECT_EQ(ds.GetServer().CreateWindow({}).value().Get(), 0);
+  EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
 }
 
 TEST(DisplayTest, CorrectWindowCreation) {

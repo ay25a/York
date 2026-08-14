@@ -5,19 +5,12 @@ namespace ye {
 std::unique_ptr<DisplayServer> DisplayServer::s_singleton;
 WindowID DisplayServer::s_next_window_id;
 
-std::expected<WindowID, eError> DisplayServer::CreateWindow(const WindowCreateInfo& ci) noexcept {
-  auto handle = PlatformCreateWindow(ci);
-  if (!handle)
-    return std::unexpected(ERR_CANNOT_CREATE);
-
-  m_windows[++s_next_window_id] = Window(handle.value(), s_next_window_id, ci.title, ci.mode, vec2<uint16_t>(ci.width, ci.height), ci.flags);
+WindowID DisplayServer::RegisterWindow(void* handle, const WindowCreateInfo& ci) {
+  m_windows[++s_next_window_id] = Window(handle, s_next_window_id, ci.title, ci.mode, vec2<uint16_t>(ci.width, ci.height), ci.flags);
   return s_next_window_id;
 }
 
-void DisplayServer::DestroyWindow(const WindowID& id) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Trying to destroy a window with invalid ID");
-
-  PlatformDestroyWindow(m_windows[id].m_handle);
+void DisplayServer::UnregisterWindow(WindowID id) {
   m_windows.erase(id);
 }
 
@@ -52,7 +45,6 @@ void DisplayServer::SetMouseWheelDelta(const WindowID& id, vec2<int16_t> delta) 
 
 void DisplayServer::ProcessEvents() noexcept {
   InputState::ResetDeltas();
-  PlatformPollEvents();
 }
 
 eError DisplayServer::Create(std::unique_ptr<DisplayServer> ds) noexcept {
@@ -68,11 +60,15 @@ eError DisplayServer::Create(std::unique_ptr<DisplayServer> ds) noexcept {
 }
 
 void DisplayServer::Shutdown() noexcept {
-  for (const auto& [_, window] : m_windows)
-    PlatformDestroyWindow(window.m_handle);
+  auto clone = m_windows;
+  for (const auto& [id, _] : clone)
+    DestroyWindow(id);
 
-  s_next_window_id = WindowID::INVALID_ID();
   s_singleton.reset();
+}
+
+DisplayServer::~DisplayServer() noexcept {
   InputState::ResetState();
+  s_next_window_id = WindowID::INVALID_ID();
 }
 }  // namespace ye
