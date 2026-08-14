@@ -6,22 +6,6 @@ class DummyDisplay {
  private:
   class DummyServer : public DisplayServer {
    public:
-    virtual ~DummyServer() noexcept override = default;
-
-   private:
-    std::expected<void*, eError> PlatformCreateWindow(const WindowCreateInfo& ci) noexcept override { return nullptr; }
-    void PlatformDestroyWindow(void* handle) noexcept override {}
-
-    void CreateInputMap() noexcept override {
-      for (size_t i = 0; i < static_cast<uint32_t>(eInputKey::Count); ++i) {
-        m_input_map[i] = static_cast<eInputKey>(i);
-      }
-    }
-
-    void PlatformPollEvents() const noexcept override {};
-    eError Initialize() noexcept override { return SUCCESS; }
-
-   public:
     void InjectKeyEvent(eInputKey key, bool is_pressed) noexcept {
       DisplayServer::SetKeyState(WindowID::INVALID_ID(), key, is_pressed);
     }
@@ -55,6 +39,21 @@ class DummyDisplay {
       if (event.scroll_delta.has_value())
         DisplayServer::SetMouseWheelDelta(WindowID::INVALID_ID(), event.scroll_delta.value());
     }
+
+   public:
+    std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept override { return RegisterWindow(nullptr, ci); }
+    void DestroyWindow(const WindowID& id) noexcept override { UnregisterWindow(id); }
+
+    virtual ~DummyServer() noexcept override = default;
+
+   private:
+    void CreateInputMap() noexcept override {
+      for (size_t i = 0; i < static_cast<uint32_t>(eInputKey::Count); ++i) {
+        m_input_map[i] = static_cast<eInputKey>(i);
+      }
+    }
+
+    eError Initialize() noexcept override { return SUCCESS; }
   };
 
  public:
@@ -67,8 +66,8 @@ class DummyDisplay {
     DisplayServer::GetSingleton().Shutdown();
   }
 
-  DummyServer* GetServer() {
-    return static_cast<DummyServer*>(&DisplayServer::GetSingleton());
+  DummyServer& GetServer() {
+    return *static_cast<DummyServer*>(&DisplayServer::GetSingleton());
   };
 };
 }  // namespace ye

@@ -11,6 +11,10 @@
 
 namespace ye {
 class DisplayServer {
+ private:
+  static WindowID s_next_window_id;
+  std::unordered_map<WindowID, Window> m_windows;
+
  public:
   struct WindowCreateInfo {
     std::string title;
@@ -20,27 +24,20 @@ class DisplayServer {
     WindowFlags flags = eWindowFlagBit::WINDOW_FLAG_MAX_BIT;
   };
 
- private:
-  std::unordered_map<WindowID, Window> m_windows;
-  static WindowID s_next_window_id;
-
-  virtual std::expected<void*, eError> PlatformCreateWindow(const WindowCreateInfo& ci) noexcept = 0;
-  virtual void PlatformDestroyWindow(void* handle) noexcept = 0;
-
-  virtual void CreateInputMap() noexcept = 0;
-  virtual void PlatformPollEvents() const noexcept = 0;
-
- public:
-  std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept;
-  void DestroyWindow(const WindowID& id) noexcept;
+  virtual std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept = 0;
+  virtual void DestroyWindow(const WindowID& id) noexcept = 0;
 
   Window& GetWindow(const WindowID& id) noexcept;
   size_t GetWindowCount() const noexcept { return m_windows.size(); }
 
-  void ProcessEvents() noexcept;
+  virtual void ProcessEvents() noexcept;
 
  protected:
   std::unordered_map<uint32_t, eInputKey> m_input_map;
+  virtual void CreateInputMap() noexcept = 0;
+
+  WindowID RegisterWindow(void* handle, const WindowCreateInfo& ci);
+  void UnregisterWindow(WindowID id);
 
   void SetWindowMode(const WindowID& id, eWindowMode mode) noexcept;
   void SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexcept;
@@ -55,7 +52,7 @@ class DisplayServer {
 
  public:
   DisplayServer() noexcept = default;
-  virtual ~DisplayServer() noexcept = default;
+  virtual ~DisplayServer() noexcept;
 
   static DisplayServer& GetSingleton() noexcept {
     YE_ASSERT(s_singleton, "DisplayServer is not initialized!");
@@ -63,7 +60,7 @@ class DisplayServer {
   };
 
   static eError Create(std::unique_ptr<DisplayServer> ds) noexcept;
-  virtual void Shutdown() noexcept;
+  void Shutdown() noexcept;
 };
 
 }  // namespace ye
