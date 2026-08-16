@@ -37,7 +37,7 @@ class DisplayServer {
   virtual void CreateInputMap() noexcept = 0;
 
   WindowID RegisterWindow(void* handle, const WindowCreateInfo& ci);
-  void UnregisterWindow(WindowID id);
+  void* UnregisterWindow(WindowID id);
 
   void SetWindowMode(const WindowID& id, eWindowMode mode) noexcept;
   void SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexcept;

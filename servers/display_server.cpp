@@ -10,8 +10,12 @@ WindowID DisplayServer::RegisterWindow(void* handle, const WindowCreateInfo& ci)
   return s_next_window_id;
 }
 
-void DisplayServer::UnregisterWindow(WindowID id) {
+void* DisplayServer::UnregisterWindow(WindowID id) {
+  YE_ASSERT(m_windows.contains(id), "Trying to unregister non-existant window id!");
+
+  void* handle = m_windows[id].m_handle;
   m_windows.erase(id);
+  return handle;
 }
 
 Window& DisplayServer::GetWindow(const WindowID& id) noexcept {
