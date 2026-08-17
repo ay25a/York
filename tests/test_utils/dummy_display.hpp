@@ -1,4 +1,5 @@
 #include <servers/display_server.hpp>
+#include <core/logger.hpp>
 
 namespace ye {
 
@@ -6,25 +7,25 @@ class DummyDisplay {
  private:
   class DummyServer : public DisplayServer {
    public:
-    void InjectKeyEvent(eInputKey key, bool is_pressed) noexcept {
-      DisplayServer::SetKeyState(WindowID::INVALID_ID(), key, is_pressed);
+    void InjectKeyEvent(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
+      DisplayServer::OnKeyInput(id, key, is_pressed);
     }
 
     struct WindowEvent {
-      std::optional<bool> is_focused;
+      bool switch_focus = false;
       std::optional<vec2<uint16_t>> size;
       std::optional<eWindowMode> mode;
     };
 
-    void InjectWindowEvent(const WindowEvent& event) noexcept {
-      if (event.is_focused.has_value())
-        DisplayServer::SetWindowFocus(WindowID::INVALID_ID(), event.is_focused.value());
+    void InjectWindowEvent(const WindowID& id, const WindowEvent& event) noexcept {
+      if (event.switch_focus)
+        DisplayServer::OnWindowFocused(id);
 
       if (event.mode.has_value())
-        DisplayServer::SetWindowMode(WindowID::INVALID_ID(), event.mode.value());
+        DisplayServer::OnWindowModeChange(id, event.mode.value());
 
       if (event.size.has_value())
-        DisplayServer::SetWindowSize(WindowID::INVALID_ID(), event.size.value());
+        DisplayServer::OnWindowResize(id, event.size->x, event.size->y);
     }
 
     struct MouseEvent {
@@ -32,32 +33,29 @@ class DummyDisplay {
       std::optional<vec2<int16_t>> scroll_delta;
     };
 
-    void InjectMouseEvent(const MouseEvent& event) noexcept {
+    void InjectMouseEvent(const WindowID& id, const MouseEvent& event) noexcept {
       if (event.position.has_value())
-        DisplayServer::SetMousePosition(WindowID::INVALID_ID(), event.position.value());
+        DisplayServer::OnMouseMove(id, event.position->x, event.position->y);
 
       if (event.scroll_delta.has_value())
-        DisplayServer::SetMouseWheelDelta(WindowID::INVALID_ID(), event.scroll_delta.value());
+        DisplayServer::OnMouseScroll(id, event.scroll_delta->x, event.scroll_delta->y);
     }
 
    public:
-    std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept override { return RegisterWindow(nullptr, ci); }
-    void DestroyWindow(const WindowID& id) noexcept override { UnregisterWindow(id); }
+    std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept override { return RegisterWindow(ci); }
+    void DestroyWindow(const WindowID& id) noexcept override { RemoveWindow(id); }
 
     virtual ~DummyServer() noexcept override = default;
 
    private:
-    void CreateInputMap() noexcept override {
-      for (size_t i = 0; i < static_cast<uint32_t>(eInputKey::Count); ++i) {
-        m_input_map[i] = static_cast<eInputKey>(i);
-      }
-    }
-
     eError Initialize() noexcept override { return SUCCESS; }
   };
 
  public:
   DummyDisplay() {
+    if (Logger::Create(false, false) != SUCCESS)
+      YE_FATAL("Logger cannot be created!");
+
     auto res = DisplayServer::Create(std::make_unique<DummyServer>());
     YE_ASSERT(res == SUCCESS, "Display Test Failed! Cannot create display server");
   }

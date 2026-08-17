@@ -8,7 +8,7 @@ TEST(DisplayTest, WindowIDGeneration) {
     DummyDisplay ds;
 
     EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
-    EXPECT_EQ(ds.GetServer().CreateWindow({}).value().Get(), 0);
+    EXPECT_EQ(ds.GetServer().CreateWindow({}).value().get(), 0);
     EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
 
     WindowID created = ds.GetServer().CreateWindow({}).value();
@@ -19,7 +19,7 @@ TEST(DisplayTest, WindowIDGeneration) {
 
   DummyDisplay ds;
   EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
-  EXPECT_EQ(ds.GetServer().CreateWindow({}).value().Get(), 0);
+  EXPECT_EQ(ds.GetServer().CreateWindow({}).value().get(), 0);
   EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
 }
 
@@ -31,17 +31,34 @@ TEST(DisplayTest, CorrectWindowCreation) {
       .mode = eWindowMode::Fullscreen,
       .width = 680,
       .height = 680,
-      .flags = eWindowFlagBit::WINDOW_FLAG_NO_RESIZE_BIT,
   };
 
-  WindowID id = DisplayServer::GetSingleton().CreateWindow(ci).value();
-  Window& win = DisplayServer::GetSingleton().GetWindow(id);
+  WindowID id = ds.GetServer().CreateWindow(ci).value();
+  const Window& win = ds.GetServer().GetWindow(id);
 
-  EXPECT_EQ(win.GetHandle(), nullptr);
-  EXPECT_EQ(win.GetMode(), ci.mode);
-  EXPECT_TRUE(win.GetSize() == vec2<uint16_t>(ci.width, ci.height));
-  EXPECT_EQ(win.GetTitle(), ci.title);
-  EXPECT_TRUE(win.IsFocused());
-  EXPECT_TRUE(win.HasFlag(eWindowFlagBit::WINDOW_FLAG_NO_RESIZE_BIT));
-  EXPECT_FALSE(win.HasFlag(eWindowFlagBit::WINDOW_FLAG_MAX_BIT));
+  EXPECT_EQ(win.mode, ci.mode);
+  EXPECT_EQ(win.size, vec2<uint16_t>(ci.width, ci.height));
+  EXPECT_EQ(win.title, ci.title);
+}
+
+TEST(DisplayTest, CorrectWindowEventHandling) {
+  DummyDisplay ds;
+
+  DisplayServer::WindowCreateInfo ci{
+      .mode = eWindowMode::Fullscreen,
+      .width = 640,
+      .height = 540,
+  };
+
+  auto id = ds.GetServer().CreateWindow(ci).value();
+
+  ds.GetServer().InjectWindowEvent(id, {.mode = eWindowMode::Minimized});
+  EXPECT_EQ(ds.GetServer().GetWindow(id).mode, eWindowMode::Minimized);
+
+  ds.GetServer().InjectWindowEvent(id, {.size = vec2<uint16_t>(640, 540)});
+  EXPECT_EQ(ds.GetServer().GetWindow(id).size, vec2<uint16_t>(640, 540));
+
+  EXPECT_FALSE(ds.GetServer().IsWindowFocused(id));
+  ds.GetServer().InjectWindowEvent(id, {.switch_focus = true});
+  EXPECT_TRUE(ds.GetServer().IsWindowFocused(id));
 }
