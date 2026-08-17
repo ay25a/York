@@ -1,54 +1,71 @@
 #include "display_server.hpp"
 #include "core/input_state.hpp"
+#include "core/logger.hpp"
 
 namespace ye {
 std::unique_ptr<DisplayServer> DisplayServer::s_singleton;
-WindowID DisplayServer::s_next_window_id;
+WindowID DisplayServer::s_next_window_id = WINDOW_ID_INVALID;
 
-WindowID DisplayServer::RegisterWindow(void* handle, const WindowCreateInfo& ci) {
-  m_windows[++s_next_window_id] = Window(handle, s_next_window_id, ci.title, ci.mode, vec2<uint16_t>(ci.width, ci.height), ci.flags);
+WindowID DisplayServer::RegisterWindow(const WindowCreateInfo& ci) {
+  m_windows[++s_next_window_id] = Window{
+      .title = ci.title,
+      .mode = ci.mode,
+      .size = vec2<uint16_t>(ci.width, ci.height),
+  };
+
+  YE_ENGINE_INFO("Window registered [id: {}, title: {}]", s_next_window_id.get(), ci.title);
   return s_next_window_id;
 }
 
-void* DisplayServer::UnregisterWindow(WindowID id) {
-  YE_ASSERT(m_windows.contains(id), "Trying to unregister non-existant window id!");
+void DisplayServer::RemoveWindow(const WindowID& id) {
+  YE_ASSERT(m_windows.contains(id), "Attempting to unregister a non-existant window");
 
-  void* handle = m_windows[id].m_handle;
   m_windows.erase(id);
-  return handle;
+  YE_ENGINE_INFO("Window removed [id: {}]", s_next_window_id.get());
 }
 
-Window& DisplayServer::GetWindow(const WindowID& id) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Getting a window with non-existant ID");
-  return m_windows[id];
+void DisplayServer::SetWindowTitle(const WindowID& id, std::string_view title) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to change a non-existant window title");
+  m_windows[id].title = title;
 }
 
-void DisplayServer::SetWindowMode(const WindowID& id, eWindowMode mode) noexcept {
-  m_windows[id].m_mode = mode;
-}
-
-void DisplayServer::SetWindowFocus(const WindowID& id, bool is_focused) noexcept {
-  m_windows[id].m_is_focused = is_focused;
-}
-
-void DisplayServer::SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexcept {
-  m_windows[id].m_size = size;
-}
-
-void DisplayServer::SetKeyState(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
-  InputState::UpdateKeyState(key, is_pressed);
-}
-
-void DisplayServer::SetMousePosition(const WindowID& id, const vec2<float>& pos) noexcept {
-  InputState::UpdateMousePosition(pos);
-}
-
-void DisplayServer::SetMouseWheelDelta(const WindowID& id, vec2<int16_t> delta) noexcept {
-  InputState::UpdateMouseWheelDelta(delta);
+const Window& DisplayServer::GetWindow(const WindowID& id) const noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to access a non-existant window");
+  return m_windows.at(id);
 }
 
 void DisplayServer::ProcessEvents() noexcept {
   InputState::ResetDeltas();
+}
+
+void DisplayServer::OnWindowFocused(const WindowID& id) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to set the focus on non-existant window");
+  m_active_window = id;
+}
+
+void DisplayServer::OnWindowModeChange(const WindowID& id, eWindowMode mode) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attemtping to set a mode for a non-existant window ");
+  m_windows[id].mode = mode;
+}
+
+void DisplayServer::OnWindowResize(const WindowID& id, uint16_t width, uint16_t height) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attemtping to set a size for a non-existant window");
+  m_windows[id].size = vec2<uint16_t>(width, height);
+}
+
+void DisplayServer::OnKeyInput(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to set key state associated with a non-existant window");
+  InputState::UpdateKeyState(key, is_pressed);
+}
+
+void DisplayServer::OnMouseMove(const WindowID& id, float window_x, float window_y) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to set mouse position associated with a non-existant window");
+  InputState::UpdateMousePosition(vec2<float>(window_x, window_y));
+}
+
+void DisplayServer::OnMouseScroll(const WindowID& id, int16_t delta_x, int16_t delta_y) noexcept {
+  YE_ASSERT(m_windows.contains(id), "Attempting to set mouse axis associated with a non-existant window");
+  InputState::UpdateMouseWheelDelta(vec2<int16_t>(delta_x, delta_y));
 }
 
 eError DisplayServer::Create(std::unique_ptr<DisplayServer> ds) noexcept {
@@ -59,20 +76,18 @@ eError DisplayServer::Create(std::unique_ptr<DisplayServer> ds) noexcept {
     return res;
 
   s_singleton.swap(ds);
-  s_singleton->CreateInputMap();
+
+  YE_ENGINE_INFO("DisplayServer created!");
   return SUCCESS;
 }
 
 void DisplayServer::Shutdown() noexcept {
-  auto clone = m_windows;
-  for (const auto& [id, _] : clone)
-    DestroyWindow(id);
-
+  YE_ENGINE_INFO("DisplayServer destroyed!");
   s_singleton.reset();
 }
 
 DisplayServer::~DisplayServer() noexcept {
   InputState::ResetState();
-  s_next_window_id = WindowID::INVALID_ID();
+  s_next_window_id = WINDOW_ID_INVALID;
 }
 }  // namespace ye

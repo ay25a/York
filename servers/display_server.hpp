@@ -14,6 +14,7 @@ class DisplayServer {
  private:
   static WindowID s_next_window_id;
   std::unordered_map<WindowID, Window> m_windows;
+  WindowID m_active_window = WINDOW_ID_INVALID;
 
  public:
   struct WindowCreateInfo {
@@ -21,30 +22,31 @@ class DisplayServer {
     eWindowMode mode = eWindowMode::Windowed;
     uint16_t width = 1080;
     uint16_t height = 1920;
-    WindowFlags flags = eWindowFlagBit::WINDOW_FLAG_MAX_BIT;
+    WindowFlags flags = WINDOW_FLAG_NONE;
   };
 
   virtual std::expected<WindowID, eError> CreateWindow(const WindowCreateInfo& ci) noexcept = 0;
   virtual void DestroyWindow(const WindowID& id) noexcept = 0;
 
-  Window& GetWindow(const WindowID& id) noexcept;
+  virtual void SetWindowTitle(const WindowID& id, std::string_view title) noexcept;
+
+  const Window& GetWindow(const WindowID& id) const noexcept;
   size_t GetWindowCount() const noexcept { return m_windows.size(); }
 
   virtual void ProcessEvents() noexcept;
+  bool IsWindowFocused(const WindowID& id) const noexcept { return m_active_window == id; };
 
  protected:
-  std::unordered_map<uint32_t, eInputKey> m_input_map;
-  virtual void CreateInputMap() noexcept = 0;
+  WindowID RegisterWindow(const WindowCreateInfo& ci);
+  void RemoveWindow(const WindowID& id);
 
-  WindowID RegisterWindow(void* handle, const WindowCreateInfo& ci);
-  void* UnregisterWindow(WindowID id);
+  void OnWindowFocused(const WindowID& id) noexcept;
+  void OnWindowModeChange(const WindowID& id, eWindowMode mode) noexcept;
+  void OnWindowResize(const WindowID& id, uint16_t width, uint16_t height) noexcept;
 
-  void SetWindowMode(const WindowID& id, eWindowMode mode) noexcept;
-  void SetWindowSize(const WindowID& id, vec2<uint16_t> size) noexcept;
-  void SetWindowFocus(const WindowID& id, bool is_focused) noexcept;
-  void SetKeyState(const WindowID& id, eInputKey native_key, bool is_pressed) noexcept;
-  void SetMousePosition(const WindowID& id, const vec2<float>& pos) noexcept;
-  void SetMouseWheelDelta(const WindowID& id, vec2<int16_t> delta) noexcept;
+  void OnKeyInput(const WindowID& id, eInputKey key, bool is_pressed) noexcept;
+  void OnMouseMove(const WindowID& id, float window_x, float window_y) noexcept;
+  void OnMouseScroll(const WindowID& id, int16_t delta_x, int16_t delta_y) noexcept;
 
  private:
   static std::unique_ptr<DisplayServer> s_singleton;
