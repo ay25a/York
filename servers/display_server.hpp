@@ -40,7 +40,7 @@ class DisplayServer {
   WindowID RegisterWindow(const WindowCreateInfo& ci);
   void RemoveWindow(const WindowID& id);
 
-  void OnWindowFocused(const WindowID& id) noexcept;
+  void OnWindowFocus(const WindowID& id, bool is_focused) noexcept;
   void OnWindowModeChange(const WindowID& id, eWindowMode mode) noexcept;
   void OnWindowResize(const WindowID& id, uint16_t width, uint16_t height) noexcept;
 

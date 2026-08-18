@@ -19,7 +19,7 @@ class DummyDisplay {
 
     void InjectWindowEvent(const WindowID& id, const WindowEvent& event) noexcept {
       if (event.switch_focus)
-        DisplayServer::OnWindowFocused(id);
+        DisplayServer::OnWindowFocus(id, true);
 
       if (event.mode.has_value())
         DisplayServer::OnWindowModeChange(id, event.mode.value());

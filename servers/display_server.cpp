@@ -38,33 +38,30 @@ void DisplayServer::ProcessEvents() noexcept {
   InputState::ResetDeltas();
 }
 
-void DisplayServer::OnWindowFocused(const WindowID& id) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attempting to set the focus on non-existant window");
-  m_active_window = id;
+void DisplayServer::OnWindowFocus(const WindowID& id, bool is_focused) noexcept {
+  if (is_focused)
+    m_active_window = id;
+  else if (m_active_window == id)
+    m_active_window = WINDOW_ID_INVALID;
 }
 
 void DisplayServer::OnWindowModeChange(const WindowID& id, eWindowMode mode) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attemtping to set a mode for a non-existant window ");
   m_windows[id].mode = mode;
 }
 
 void DisplayServer::OnWindowResize(const WindowID& id, uint16_t width, uint16_t height) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attemtping to set a size for a non-existant window");
   m_windows[id].size = vec2<uint16_t>(width, height);
 }
 
 void DisplayServer::OnKeyInput(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attempting to set key state associated with a non-existant window");
   InputState::UpdateKeyState(key, is_pressed);
 }
 
 void DisplayServer::OnMouseMove(const WindowID& id, float window_x, float window_y) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attempting to set mouse position associated with a non-existant window");
   InputState::UpdateMousePosition(vec2<float>(window_x, window_y));
 }
 
 void DisplayServer::OnMouseScroll(const WindowID& id, int16_t delta_x, int16_t delta_y) noexcept {
-  YE_ASSERT(m_windows.contains(id), "Attempting to set mouse axis associated with a non-existant window");
   InputState::UpdateMouseWheelDelta(vec2<int16_t>(delta_x, delta_y));
 }
 
