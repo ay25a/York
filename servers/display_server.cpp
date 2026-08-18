@@ -53,15 +53,15 @@ void DisplayServer::OnWindowResize(const WindowID& id, uint16_t width, uint16_t 
   m_windows[id].size = vec2<uint16_t>(width, height);
 }
 
-void DisplayServer::OnKeyInput(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
+void DisplayServer::OnKeyInput(eInputKey key, bool is_pressed) noexcept {
   InputState::UpdateKeyState(key, is_pressed);
 }
 
-void DisplayServer::OnMouseMove(const WindowID& id, float window_x, float window_y) noexcept {
+void DisplayServer::OnMouseMove(float window_x, float window_y) noexcept {
   InputState::UpdateMousePosition(vec2<float>(window_x, window_y));
 }
 
-void DisplayServer::OnMouseScroll(const WindowID& id, int16_t delta_x, int16_t delta_y) noexcept {
+void DisplayServer::OnMouseScroll(int16_t delta_x, int16_t delta_y) noexcept {
   InputState::UpdateMouseWheelDelta(vec2<int16_t>(delta_x, delta_y));
 }
 

@@ -44,9 +44,9 @@ class DisplayServer {
   void OnWindowModeChange(const WindowID& id, eWindowMode mode) noexcept;
   void OnWindowResize(const WindowID& id, uint16_t width, uint16_t height) noexcept;
 
-  void OnKeyInput(const WindowID& id, eInputKey key, bool is_pressed) noexcept;
-  void OnMouseMove(const WindowID& id, float window_x, float window_y) noexcept;
-  void OnMouseScroll(const WindowID& id, int16_t delta_x, int16_t delta_y) noexcept;
+  void OnKeyInput(eInputKey key, bool is_pressed) noexcept;
+  void OnMouseMove(float window_x, float window_y) noexcept;
+  void OnMouseScroll(int16_t delta_x, int16_t delta_y) noexcept;
 
  private:
   static std::unique_ptr<DisplayServer> s_singleton;

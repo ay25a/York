@@ -7,8 +7,8 @@ class DummyDisplay {
  private:
   class DummyServer : public DisplayServer {
    public:
-    void InjectKeyEvent(const WindowID& id, eInputKey key, bool is_pressed) noexcept {
-      DisplayServer::OnKeyInput(id, key, is_pressed);
+    void InjectKeyEvent(eInputKey key, bool is_pressed) noexcept {
+      DisplayServer::OnKeyInput(key, is_pressed);
     }
 
     struct WindowEvent {
@@ -33,12 +33,12 @@ class DummyDisplay {
       std::optional<vec2<int16_t>> scroll_delta;
     };
 
-    void InjectMouseEvent(const WindowID& id, const MouseEvent& event) noexcept {
+    void InjectMouseEvent(const MouseEvent& event) noexcept {
       if (event.position.has_value())
-        DisplayServer::OnMouseMove(id, event.position->x, event.position->y);
+        DisplayServer::OnMouseMove(event.position->x, event.position->y);
 
       if (event.scroll_delta.has_value())
-        DisplayServer::OnMouseScroll(id, event.scroll_delta->x, event.scroll_delta->y);
+        DisplayServer::OnMouseScroll(event.scroll_delta->x, event.scroll_delta->y);
     }
 
    public:
