@@ -10,7 +10,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
 
-option(YORK_BUILD_TESTS "Build engine test executable" ON)
+option(YORK_BUILD_TESTS "Build engine test executable" OFF)
 
 set(YORK_SOURCES)
 set(YORK_HEADERS)
@@ -22,7 +22,7 @@ include(vendor/vendor.cmake)
 
 add_library(york STATIC ${YORK_SOURCES} ${YORK_HEADERS})
 target_include_directories(york PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
-target_link_libraries(york PUBLIC spdlog)
+target_link_libraries(york PUBLIC stdc++exp spdlog)
 
 if(NOT MSVC)
   target_compile_options(york PRIVATE -fno-exceptions)
