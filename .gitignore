@@ -2,7 +2,6 @@ bin/
 build/
 .cache/
 .temp/
-.zed/
-docs/.obsidian/
 .env
 logs/
+docs/

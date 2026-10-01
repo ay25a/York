@@ -6,10 +6,10 @@
 #include <filesystem>
 
 namespace ye {
+Logger* Logger::s_singleton = nullptr;
+
 const std::filesystem::path Logger::FILE_LOG_PATH = std::filesystem::current_path().append("logs");
 const std::chrono::system_clock::time_point Logger::LAUNCH_TIMESTAMP = std::chrono::system_clock::now();
-
-Logger* Logger::s_singleton = nullptr;
 
 std::shared_ptr<spdlog::logger> Logger::CreateLogger(const char* name, bool enable_file, bool enable_console) {
   std::vector<spdlog::sink_ptr> sinks;
@@ -25,11 +25,11 @@ std::shared_ptr<spdlog::logger> Logger::CreateLogger(const char* name, bool enab
 
   auto logger = std::make_shared<spdlog::async_logger>(name, sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
   logger->set_pattern("%^[%n %l | %H:%M:%S.%e]: %v%$");
+  logger->set_level(spdlog::level::trace);
+  logger->flush_on(spdlog::level::warn);
 
 #ifdef YE_DEBUG
   logger->disable_backtrace();
-  logger->set_level(spdlog::level::trace);
-  logger->flush_on(spdlog::level::warn);
 #else
   logger->enable_backtrace(32);
   logger->flush_on(spdlog::level::err);

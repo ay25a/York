@@ -49,27 +49,46 @@ class Logger {
   ~Logger() = default;
   void Shutdown();
 };
+}  // namespace ye
 
-#define YE_ENGINE_ERROR(...) Logger::GetSingleton().GetEngineLogger().error(__VA_ARGS__)
-#define YE_ENGINE_WARN(...) Logger::GetSingleton().GetEngineLogger().warn(__VA_ARGS__)
-#define YE_ENGINE_TRACE(...) Logger::GetSingleton().GetEngineLogger().trace(__VA_ARGS__)
+#define YE_ENGINE_ERROR(...)                                           \
+  do {                                                                 \
+    ::ye::Logger::GetSingleton().GetEngineLogger().error(__VA_ARGS__); \
+    ::ye::Logger::GetSingleton().GetEngineLogger().dump_backtrace();   \
+  } while (0)
 
-#ifdef YE_DEBUG
-#define YE_ENGINE_INFO(...) Logger::GetSingleton().GetEngineLogger().info(__VA_ARGS__)
+#define YE_ENGINE_WARN(...)                                           \
+  do {                                                                \
+    ::ye::Logger::GetSingleton().GetEngineLogger().warn(__VA_ARGS__); \
+    ::ye::Logger::GetSingleton().GetEngineLogger().dump_backtrace();  \
+  } while (0)
+
+#define YE_ENGINE_TRACE(...) ::ye::Logger::GetSingleton().GetEngineLogger().trace(__VA_ARGS__)
+#define YE_ENGINE_DEBUG(...) ::ye::Logger::GetSingleton().GetEngineLogger().debug(__VA_ARGS__)
+
+#define YE_CLIENT_ERROR(...)                                           \
+  do {                                                                 \
+    ::ye::Logger::GetSingleton().GetClientLogger().error(__VA_ARGS__); \
+    ::ye::Logger::GetSingleton().GetClientLogger().dump_backtrace();   \
+  } while (0)
+
+#define YE_CLIENT_WARN(...)                                           \
+  do {                                                                \
+    ::ye::Logger::GetSingleton().GetClientLogger().warn(__VA_ARGS__); \
+    ::ye::Logger::GetSingleton().GetClientLogger().dump_backtrace();  \
+  } while (0)
+
+#define YE_CLIENT_TRACE(...) ::ye::Logger::GetSingleton().GetClientLogger().trace(__VA_ARGS__)
+#define YE_CLIENT_DEBUG(...) ::ye::Logger::GetSingleton().GetClientLogger().debug(__VA_ARGS__)
+
+#if not defined(YE_SUPPRESS_ENGINE_INFO) and not defined(YE_RELEASE)
+#define YE_ENGINE_INFO(...) ::ye::Logger::GetSingleton().GetEngineLogger().info(__VA_ARGS__)
 #else
 #define YE_ENGINE_INFO(...)
 #endif
 
-#ifdef YE_LOGGER_CLIENT_MACROS
-#define YE_CLIENT_ERROR(...) Logger::GetSingleton().GetClientLogger().error(__VA_ARGS__)
-#define YE_CLIENT_WARN(...) Logger::GetSingleton().GetClientLogger().warn(__VA_ARGS__)
-#define YE_CLIENT_TRACE(...) Logger::GetSingleton().GetClientLogger().trace(__VA_ARGS__)
-
-#ifdef YE_DEBUG
-#define YE_CLIENT_INFO(...) Logger::GetSingleton().GetClientLogger().info(__VA_ARGS__)
+#ifndef YE_RELEASE
+#define YE_CLIENT_INFO(...) ::ye::Logger::GetSingleton().GetClientLogger().info(__VA_ARGS__)
 #else
 #define YE_CLIENT_INFO(...)
 #endif
-#endif
-
-}  // namespace ye
