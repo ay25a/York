@@ -5,60 +5,51 @@ using namespace ye;
 
 TEST(DisplayTest, WindowIDGeneration) {
   while (0) {
-    DummyDisplay ds;
+    auto ds = DummyDisplayServer();
 
-    EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
-    EXPECT_EQ(ds.GetServer().CreateWindow({}).value().get(), 0);
-    EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
+    EXPECT_EQ(ds.GetWindowCount(), 0);
+    EXPECT_EQ(ds.CreateWindow("", 0, 0, ye::WINDOW_FLAG_NONE).value(), 0);
+    EXPECT_EQ(ds.GetWindowCount(), 1);
 
-    WindowID created = ds.GetServer().CreateWindow({}).value();
-    EXPECT_EQ(ds.GetServer().GetWindowCount(), 2);
-    ds.GetServer().DestroyWindow(created);
-    EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
+    WindowID created = ds.CreateWindow("", 0, 0, ye::WINDOW_FLAG_NONE).value();
+    EXPECT_EQ(ds.GetWindowCount(), 2);
+    ds.DestroyWindow(created);
+    EXPECT_EQ(ds.GetWindowCount(), 1);
   }
 
-  DummyDisplay ds;
-  EXPECT_EQ(ds.GetServer().GetWindowCount(), 0);
-  EXPECT_EQ(ds.GetServer().CreateWindow({}).value().get(), 0);
-  EXPECT_EQ(ds.GetServer().GetWindowCount(), 1);
+  auto ds = DummyDisplayServer();
+  EXPECT_EQ(ds.GetWindowCount(), 0);
+  EXPECT_EQ(ds.CreateWindow("", 0, 0, ye::WINDOW_FLAG_NONE).value(), 0);
+  EXPECT_EQ(ds.GetWindowCount(), 1);
 }
 
 TEST(DisplayTest, CorrectWindowCreation) {
-  DummyDisplay ds;
+  auto ds = DummyDisplayServer();
 
-  DisplayServer::WindowCreateInfo ci{
-      .title = "Hello",
-      .mode = eWindowMode::Fullscreen,
-      .width = 680,
-      .height = 680,
-  };
+  const char* title = "Dummy";
+  uint16_t width = 688;
+  uint16_t height = 854;
 
-  WindowID id = ds.GetServer().CreateWindow(ci).value();
-  const Window& win = ds.GetServer().GetWindow(id);
+  WindowID id = ds.CreateWindow(title, width, height, ye::WINDOW_FLAG_NONE).value();
+  const Window& win = ds.GetWindow(id);
 
-  EXPECT_EQ(win.mode, ci.mode);
-  EXPECT_EQ(win.size, vec2<uint16_t>(ci.width, ci.height));
-  EXPECT_EQ(win.title, ci.title);
+  EXPECT_EQ(win.mode, eWindowMode::Windowed);
+  EXPECT_EQ(win.size, vec2<uint16_t>(width, height));
+  EXPECT_EQ(win.title, title);
 }
 
 TEST(DisplayTest, CorrectWindowEventHandling) {
-  DummyDisplay ds;
+  auto ds = DummyDisplayServer();
 
-  DisplayServer::WindowCreateInfo ci{
-      .mode = eWindowMode::Fullscreen,
-      .width = 640,
-      .height = 540,
-  };
+  auto id = ds.CreateWindow("", 640, 540, ye::WINDOW_FLAG_NONE).value();
 
-  auto id = ds.GetServer().CreateWindow(ci).value();
+  ds.InjectWindowEvent(id, {.mode = eWindowMode::Minimized});
+  EXPECT_EQ(ds.GetWindow(id).mode, eWindowMode::Minimized);
 
-  ds.GetServer().InjectWindowEvent(id, {.mode = eWindowMode::Minimized});
-  EXPECT_EQ(ds.GetServer().GetWindow(id).mode, eWindowMode::Minimized);
+  ds.InjectWindowEvent(id, {.size = vec2<uint16_t>(640, 540)});
+  EXPECT_EQ(ds.GetWindow(id).size, vec2<uint16_t>(640, 540));
 
-  ds.GetServer().InjectWindowEvent(id, {.size = vec2<uint16_t>(640, 540)});
-  EXPECT_EQ(ds.GetServer().GetWindow(id).size, vec2<uint16_t>(640, 540));
-
-  EXPECT_FALSE(ds.GetServer().IsWindowFocused(id));
-  ds.GetServer().InjectWindowEvent(id, {.switch_focus = true});
-  EXPECT_TRUE(ds.GetServer().IsWindowFocused(id));
+  EXPECT_TRUE(ds.IsWindowFocused(id));
+  ds.InjectWindowEvent(id, {.focus = false});
+  EXPECT_FALSE(ds.IsWindowFocused(id));
 }

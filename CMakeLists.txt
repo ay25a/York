@@ -10,7 +10,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/)
 
-option(YORK_BUILD_TESTS "Build engine test executable" OFF)
+option(YORK_BUILD_TESTS "Build engine test executable" ON)
 
 set(YORK_SOURCES)
 set(YORK_HEADERS)
@@ -21,13 +21,14 @@ include(servers/servers.cmake)
 include(vendor/vendor.cmake)
 
 add_library(york STATIC ${YORK_SOURCES} ${YORK_HEADERS})
+set_property(TARGET york  PROPERTY COMPILE_WARNING_AS_ERROR ON)
 target_include_directories(york PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 target_link_libraries(york PUBLIC stdc++exp spdlog)
 
 if(NOT MSVC)
-  target_compile_options(york PRIVATE -fno-exceptions)
+  target_compile_options(york PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 else()
-  target_compile_options(york PRIVATE /EHs-c-)
+  target_compile_options(york PRIVATE /EHs-c- /W4)
 endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Release")

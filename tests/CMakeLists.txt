@@ -8,11 +8,14 @@ add_executable(york_tests
   display_test.cpp
   input_test.cpp
 )
+
 target_link_libraries(york_tests PRIVATE
   york
   GTest::gtest
   GTest::gtest_main
 )
+
+target_compile_definitions(york_tests PRIVATE YE_SUPPRESS_ENGINE_INFO)
 
 include(GoogleTest)
 gtest_discover_tests(york_tests)

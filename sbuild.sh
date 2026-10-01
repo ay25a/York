@@ -9,6 +9,7 @@ usage() {
     echo "  $0 clean"
     echo "  $0 build <debug|release|relwithdebinfo>"
     echo "  $0 enable <debug|release|relwithdebinfo>"
+    echo "  $0 test <debug|release|relwithdebinfo>"
     echo "  $0 run <debug|release|relwithdebinfo>"
     exit 1
 }
@@ -28,7 +29,7 @@ case "$COMMAND" in
         rm -rf "$ROOT/bin" "$ROOT/build"
         ;;
 
-    build|enable|run)
+    build|enable|run|test)
         if [[ $# -ne 2 ]]; then
             usage
         fi
@@ -38,12 +39,15 @@ case "$COMMAND" in
         case "$CONFIG" in
             debug)
                 SANDBOX="sandbox_debug"
+                ETEST="york_tests_debug"
                 ;;
             release)
                 SANDBOX="sandbox_release"
+                ETEST="york_tests_release"
                 ;;
             relwithdebinfo)
-                SANDBOX="sandbox_relWithDebInfo"
+                SANDBOX="sandbox_relwithdebinfo"
+                ETEST="york_tests_relwithdebinfo"
                 ;;
             *)
                 usage
@@ -62,8 +66,15 @@ case "$COMMAND" in
                 ;;
 
             run)
+                cmake --build "$ROOT/build/$CONFIG" -j 8
                 cd "$ROOT/bin"
                 exec "./$SANDBOX"
+                ;;
+
+            test)
+                cmake --build "$ROOT/build/$CONFIG" -j 8
+                cd "$ROOT/bin"
+                exec "./$ETEST"
                 ;;
         esac
         ;;
