@@ -4,6 +4,11 @@
 namespace ye {
 
 class DummyDisplayServer : public DisplayServer {
+  Monitor m_monitor;
+
+ public:
+  virtual const Monitor& GetMonitor() override { return m_monitor; }
+
  public:
   void InjectKeyEvent(eInputKey key, bool is_pressed) noexcept { DisplayServer::OnKeyInput(key, is_pressed); }
 
