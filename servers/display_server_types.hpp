@@ -26,4 +26,15 @@ struct Window {
   eWindowMode mode = eWindowMode::Windowed;
   eWindowFlagBit flags = WINDOW_FLAG_NONE;
 };
+
+struct Monitor {
+  uint32_t id = 0;
+  std::string name;
+
+  uint32_t width = 0;
+  uint32_t height = 0;
+
+  float scale = .0f;
+  float refresh_rate = .0f;
+};
 }  // namespace ye

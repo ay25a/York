@@ -3,7 +3,7 @@
 #include <cstdint>
 #include "core/error_enum.hpp"
 #include "core/input_enum.hpp"
-#include "display/window.hpp"
+#include "display_server_types.hpp"
 #include "core/assertion.hpp"
 #include <expected>
 #include <memory>
@@ -26,6 +26,9 @@ class DisplayServer {
 
   virtual void SetWindowTitle(WindowID id, std::string_view title) noexcept;
   virtual void ProcessEvents() noexcept;
+
+ public:
+  virtual const Monitor& GetMonitor() = 0;
 
  protected:
   void OnWindowFocus(WindowID id, bool is_focused) noexcept;
